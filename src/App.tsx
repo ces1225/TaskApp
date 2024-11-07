@@ -5,9 +5,10 @@ import ListsContainer from './components/ListsContainer/ListsContainer'
 import { useTypedDispatch, useTypedSelector } from './hooks/redux'
 import EditModal from './components/EditModal/EditModal'
 import LoggerModal from './components/LoggerModal/LoggerModal'
-import { deleteBoard } from './store/slices/boardSlice'
+import { deleteBoard, sort } from './store/slices/boardSlice'
 import { addLog } from './store/slices/loggerSlice'
 import { v4 } from 'uuid'
+import { DragDropContext } from 'react-beautiful-dnd'
 
 
 function App() {
@@ -54,6 +55,41 @@ function App() {
     }
   }
 
+  const handleDragEnd = (result : any) => {
+    console.log(result);
+    const {destination , source, draggableId} = result;
+    console.log('lists', lists);
+
+    const sourceList = lists.filter(
+      list => list.listId === source.dropabbleId
+    )[0];
+    console.log('source list', sourceList)
+
+    dispatch(
+      sort({
+        boardIndex : boards.findIndex(board => board.boardId === activeBoardId),
+        droppableIdStart : source.droppableId,
+        droppableIdEnd : destination.droppableId,
+        droppableIndexStart : source.index,
+        droppableIndexEnd : destination.index,
+        draggableId
+      })
+    )
+
+    dispatch(
+      addLog({
+        logId : v4(),
+        logMessage : `
+        리스트 "${sourceList.listName}" 에서
+        리스트 "${lists.filter(list => list.listId === destination.droppableId)[0].listName}으로
+        ${source.tasks.filter(task => task.taskId === draggableId)[0].taskName}을 옮김.
+        `,
+        logAuthor : "User",
+        logTimestamp : String(Date.now()),
+      })
+    )
+  }
+
   return (
     <div className = {appContainer}>
       {isLoggerOpen ? <LoggerModal setIsLoggerOpen = {setIsLoggerOpen}/> : null}
@@ -65,14 +101,22 @@ function App() {
       />
       
       <div className={board}>
-        <ListsContainer lists={lists} boardId ={getActiveBoard.boardId} />
+        <DragDropContext onDragEnd={handleDragEnd}>
+          <ListsContainer lists={lists} boardId ={getActiveBoard.boardId} />      
+        </DragDropContext>
       </div>
 
       <div className={buttons}>
         <button className={deleteBoardButton} onClick ={handleDeleteBoard}>
           이 게시판 삭제하기
         </button>
-        <button className={loggerButton} onClick={()=>setIsLoggerOpen(!isLoggerOpen)}>
+        <button className={loggerButton} 
+        onClick={()=>
+        {
+          console.log(isLoggerOpen)
+          setIsLoggerOpen(!isLoggerOpen)
+
+        }}>
           {isLoggerOpen ? "활동 목록 숨기기" : "활동 목록 보이기"}
         </button>
       </div>

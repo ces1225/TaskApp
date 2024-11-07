@@ -1,11 +1,14 @@
 import { boardsReducer } from "../slices/boardSlice";
 import { loggerReducer } from "../slices/loggerSlice";
 import { modalReducer } from "../slices/modalSlice";
+import { userReducer } from "../slices/userSlice";
+
 
 const reducer = {
     logger : loggerReducer,
     boards : boardsReducer,
-    modal : modalReducer
+    modal : modalReducer,
+    user : userReducer
 }
 
 // 얘는 불러올 때 변수의 이름 설정이 가능한데,
