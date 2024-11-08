@@ -1,6 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { IBoard, IList, ITask } from "../../types";
-import { setModalData } from "./modalSlice";
 
 type TBoardsState = {
     modalActive : boolean;
@@ -42,8 +41,8 @@ type TSortAction = {
     boardIndex : number;
     droppableIdStart : string;
     droppableIdEnd : string;
-    droppableIndexStart : string;
-    droppableIndexEnd : string;
+    droppableIndexStart : number;
+    droppableIndexEnd : number;
     draggableId : string;
 }
 
@@ -205,11 +204,12 @@ const boardSlice = createSlice({
                 const list = state.boardArray[payload.boardIndex].lists.find(
                     list => list.listId === payload.droppableIdStart
                 )
-
+                
                 // 변경시키는 아이템을 배열에서 지워준다.
                 // return 값으로 지워진 아이템을 잡아준다.
                 const card = list?.tasks.splice(payload.droppableIndexStart, 1);
-                    list?.tasks.splice(payload.droppableIndexEnd,0,...card!)
+                    
+                list?.tasks.splice(payload.droppableIndexEnd, 0 , ...card!);
             }
             
             //other list
@@ -218,10 +218,12 @@ const boardSlice = createSlice({
                     list => list.listId === payload.droppableIdStart
                 )
 
-                const card = listStart!.tasks.splice(payload.droppableIndexStart,1);
+                const card = listStart!.tasks.splice(payload.droppableIndexStart , 1);
+
                 const listEnd = state.boardArray[payload.boardIndex].lists.find(
                     list=>list.listId === payload.droppableIdEnd
                 )
+                
                 listEnd?.tasks.splice(payload.droppableIndexEnd, 0, ...card)
             }
         }
